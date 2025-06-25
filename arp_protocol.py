@@ -11,6 +11,8 @@ OPERATION_REPLY = 2
 ETHERNET_TYPE = 1
 IP_PROTOCOL = 0x0800
 OPERATION_OFFSET = 6
+MAC_LENGTH = 6
+IP_LENGTH = 4
 
 def handle_arp(raw_data : bytes, my_mac : bytes) -> Optional[Tuple[bytes, bytes]]:
     """
@@ -53,8 +55,19 @@ def craft_arp(hardware_type : int, protocol : int, hardware_length : int, protoc
               src_hardware : bytes, src_net : bytes, resolve_hardware : bytes, resolve_net : bytes):
     """
     Crafts an arp request based on ALL the arp parameters. can be used to send with ethernet.
+
+    @return: An arp payload with all requested fields.
     """
     header = struct.pack(HEADER_BASE, hardware_type, protocol, hardware_length, protocol_length, operation)
     adresses_protocol = (str(hardware_length) + "s" + str(protocol_length) + "s") * 2
     adresses = struct.pack(adresses_protocol, src_hardware, src_net, resolve_hardware, resolve_net)
     return header + adresses
+
+def craft_arp_over_eth_ip(src_mac : bytes, src_ip : bytes,
+                          resolve_mac : bytes, resolve_ip : bytes, operation : int):
+    """
+    A wrapper to "craft_arp", that crafts an arp request, with fields constants
+    that are determined by that IP and ETHERNET are around it.
+    """
+    craft_arp(ETHERNET_TYPE, IP_PROTOCOL, MAC_LENGTH, IP_LENGTH, operation,
+              src_mac, src_ip, resolve_mac, resolve_ip)
