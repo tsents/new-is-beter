@@ -14,27 +14,26 @@ OPERATION_OFFSET = 6
 MAC_LENGTH = 6
 IP_LENGTH = 4
 
-def handle_arp(raw_data : bytes, my_mac : bytes, my_ip : bytes) -> Optional[Tuple[bytes, bytes]]:
+def handle_arp(payload : bytes, my_mac : bytes, my_ip : bytes) -> Optional[Tuple[bytes, bytes]]:
     """
     Implements the arp protocol, including parsing of arp requests & responses,
     and responding to those request (Dummy response not to break my network).
 
-    @param raw_data: The raw data from the above level to parse. (AKA from ethernet)
+    @param parload: The raw data from the above level to parse. (AKA from ethernet)
     @param my_mac:   My own mac, used to check.
     @return:         The destenation to replay to, and the arp replay, if one is needed.
     """
-    hardware_type, protocol, hardware_length, protocol_length, operation = struct.unpack_from(HEADER_BASE, raw_data)
+    hardware_type, protocol, hardware_length, protocol_length, operation = struct.unpack_from(HEADER_BASE, payload)
     adresses_protocol = (str(hardware_length) + "s" + str(protocol_length) + "s") * 2
-    src_hardware, src_net, resolve_hardware, resolve_net = struct.unpack_from(adresses_protocol, raw_data, BASE_LEN)
+    src_hardware, src_net, resolve_hardware, resolve_net = struct.unpack_from(adresses_protocol, payload, BASE_LEN)
     # WARNINGS DEFINITIONS
     if hardware_type != ETHERNET_TYPE:
         print(f"WARNING: Unexpected packet, Hardware type is not Ethernet {hardware_type}")
-        return None
     if protocol != IP_PROTOCOL:
         print(f"WARNING: Unexpected packet, protocol type is not IP {protocol}")
-        return None
 
     # PRINT TRAFFIC
+    # NOTE the pretty prints may break if not ip/eth. but we have warning to indicate it.
     if operation == OPERATION_REPLY:
         print(f"Tell {pretty_ip(resolve_net)} on {pretty_mac(resolve_hardware)}", end=" ")
         print(f"that {pretty_ip(src_net)} is at {pretty_mac(src_hardware)}")
@@ -68,6 +67,8 @@ def craft_arp_over_eth_ip(src_mac : bytes, src_ip : bytes,
     """
     A wrapper to "craft_arp", that crafts an arp request, with fields constants
     that are determined by that IP and ETHERNET are around it.
+
+    @return: An arp payload, with based on the specified parameters.
     """
     craft_arp(ETHERNET_TYPE, IP_PROTOCOL, MAC_LENGTH, IP_LENGTH, operation,
               src_mac, src_ip, resolve_mac, resolve_ip)
