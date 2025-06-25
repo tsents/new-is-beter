@@ -1,5 +1,6 @@
 from scapy.all import conf, IFACES
 import ethernet_protocol
+import arp_protocol
 
 def sniffer(sock, iface : str) -> None:
     """
@@ -17,8 +18,18 @@ def sniffer(sock, iface : str) -> None:
         raw_frame = sock.recv_raw()
         if raw_frame[1] is None:
             continue
-        data, src, eth_type, = ethernet_protocol.ethernet_protcol(raw_frame[1], my_numeric_mac, False)
-        print(data, src, eth_type)
+        ethernet_data = ethernet_protocol.ethernet_protcol(raw_frame[1], my_numeric_mac, False)
+        if ethernet_data is None:
+            continue
+        dispatch_ethernet(ethernet_data[0], ethernet_data[1], ethernet_data[2])
+
+
+def dispatch_ethernet(data : bytes, src_mac : bytes, eth_type : bytes) -> None:
+    """
+    Dispatches the next protocol, based on the eth_type and data.
+    """
+    if eth_type == ethernet_protocol.ARP_TYPE:
+         arp_protocol.arp_protcol(data, src_mac)
 
 
 def main() -> None:
