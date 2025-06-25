@@ -13,7 +13,7 @@ def sniffer(sock, iface : str) -> None:
     if my_mac is None:
         return
 
-    my_numeric_mac : bytes = utilities.numeric_mac(my_mac)
+    my_numeric_mac : bytes = utilities.raw_mac(my_mac)
     while True: 
         raw_frame = sock.recv_raw()
         if raw_frame[1] is None:
