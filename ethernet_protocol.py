@@ -15,7 +15,7 @@ def numeric_mac(mac : str) -> bytes:
     """
     return bytes(int(mac[i:i + 2], 16) for i in range(0, len(mac), 3))
 
-def ethernet_protcol(raw_frame : bytes, my_mac : bytes, promisc : bool) -> Optional[Tuple[bytes]]:
+def ethernet_protcol(raw_frame : bytes, my_mac : bytes, promisc : bool) -> Optional[Tuple[bytes, bytes, bytes]]:
     """
     Parses raw bytes (raw_frame) into the packet using ethernet protocol.
 
