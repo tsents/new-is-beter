@@ -9,7 +9,7 @@ def raw_mac(mac : str) -> bytes:
     """
     Convert mac from string format 0c:fa:78:54:32:12 to bytes.
     """
-    return bytes(int(mac[i:i + 2], 16) for i in range(0, len(mac), 3))
+    return bytes.fromhex(mac_str.replace(':', ''))
 
 def pretty_mac(raw_mac : bytes) -> str:
     """
