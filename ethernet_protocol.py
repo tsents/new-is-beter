@@ -1,4 +1,5 @@
 import struct
+from typing import Optional, Tuple
 
 ETH_PROTOCOL="6s6s2s"
 HEADER_SIZE = 14
@@ -6,6 +7,7 @@ HEADER_SIZE = 14
 # VLAN_STRUCT_SIZE = 4
 # VLAN_TYPE = b"\x81\x00"
 BROADCAST = b"\xff\xff\xff\xff\xff\xff"
+ARP_TYPE = b"\x08\x06"
 
 def numeric_mac(mac : str) -> bytes:
     """
@@ -13,7 +15,7 @@ def numeric_mac(mac : str) -> bytes:
     """
     return bytes(int(mac[i:i + 2], 16) for i in range(0, len(mac), 3))
 
-def ethernet_protcol(raw_frame : bytes, my_mac : bytes, promisc : bool):
+def ethernet_protcol(raw_frame : bytes, my_mac : bytes, promisc : bool) -> Optional[Tuple[bytes]]:
     """
     Parses raw bytes (raw_frame) into the packet using ethernet protocol.
 
@@ -26,6 +28,6 @@ def ethernet_protcol(raw_frame : bytes, my_mac : bytes, promisc : bool):
     print(dst_mac, type(dst_mac), my_mac)
     if not promisc:
         if not (dst_mac == my_mac or dst_mac == BROADCAST):
-            return None, None, None
-    unparsed_data = raw_frame[HEADER_SIZE]
+            return None
+    unparsed_data = raw_frame[HEADER_SIZE:]
     return unparsed_data, src_mac, ether_type
