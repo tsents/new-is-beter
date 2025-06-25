@@ -15,7 +15,7 @@ def pretty_mac(raw_mac : bytes) -> str:
     """
     Convert mac form raw bytes format, into ff:ff:ff:.. format.
     """
-    return ":".join(hex(i)[2:] for i in raw_mac)
+    return ":".join(i.hex() for i in raw_mac)
 
 def parse_ethernet(raw_frame : bytes, my_mac : bytes, promisc : bool) -> Optional[Tuple[bytes, bytes, int]]:
     """
