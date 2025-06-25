@@ -12,9 +12,13 @@ ETHERNET_TYPE = 1
 IP_PROTOCOL = 0x0800
 OPERATION_OFFSET = 6
 
-def arp_protocol(raw_data : bytes, my_mac : bytes) -> Optional[Tuple[bytes, bytes]]:
+def parse_arp(raw_data : bytes, my_mac : bytes) -> Optional[Tuple[bytes, bytes]]:
     """
-    parses arp protocol, can be used over more then IP, but used mostly for IP.
+    Implements the arp protocol, including parsing of arp requests & responses,
+    and responding to those request (Dummy response not to break my network).
+
+    @param raw_data: The raw data from the above level to parse. (AKA from ethernet)
+    @param my_mac:   My own mac, used to check.
     """
     hardware_type, protocol, hardware_length, protocol_length, operation = struct.unpack_from(HEADER_BASE, raw_data)
     data_protocol = (str(hardware_length) + "s" + str(protocol_length) + "s") * 2
@@ -39,7 +43,7 @@ def arp_protocol(raw_data : bytes, my_mac : bytes) -> Optional[Tuple[bytes, byte
         arp_response += src_hardware + src_net
         print(len(arp_response), len(raw_data))
         print("Possible arp response:")
-        arp_protocol(arp_response, my_mac)
+        parse_arp(arp_response, my_mac)
         print("<<<<<<<<<\n")
         # return arp_response, src_hardware
     return None
