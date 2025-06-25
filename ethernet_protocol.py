@@ -1,15 +1,11 @@
 import struct
 from typing import Optional, Tuple
 
-ETH_PROTOCOL="6s6s2s"
+ETH_PROTOCOL="!6s6sH"
 HEADER_SIZE = 14
-# VLAN_STRUCT = "h2s"
-# VLAN_STRUCT_SIZE = 4
-# VLAN_TYPE = b"\x81\x00"
 BROADCAST = b"\xff\xff\xff\xff\xff\xff"
-ARP_TYPE = b"\x08\x06"
 
-def numeric_mac(mac : str) -> bytes:
+def raw_mac(mac : str) -> bytes:
     """
     Convert mac from string format 0c:fa:78:54:32:12 to bytes.
     """
@@ -21,24 +17,26 @@ def pretty_mac(raw_mac : bytes) -> str:
     """
     return ":".join(hex(i)[2:] for i in raw_mac)
 
-def ethernet_protcol(raw_frame : bytes, my_mac : bytes, promisc : bool) -> Optional[Tuple[bytes, bytes, bytes]]:
+def parse_ethernet(raw_frame : bytes, my_mac : bytes, promisc : bool) -> Optional[Tuple[bytes, bytes, int]]:
     """
-    Parses raw bytes (raw_frame) into the packet using ethernet protocol.
+    Parses raw bytes (raw_frame) into payload, src_mac, and ether_type.
+    Additionaly, it checks if the frame has the currect destination based on
+    the mode (promisc) and its own mac.
 
     @param raw_frame:   Raw bytes given to parse.
     @param my_mac:      The interface mac, used to check vs the mac of the frame.
     @param promisc:     Choose if throw the frame if mac doesn't match
-    @return:            The data if given. 
+    @return:            The payload, src_mac of the frame, and ether_type field.
     """
     dst_mac, src_mac, ether_type = struct.unpack(ETH_PROTOCOL, raw_frame[:HEADER_SIZE])
     if not promisc:
         if not (dst_mac == my_mac or dst_mac == BROADCAST):
             return None
-    unparsed_data = raw_frame[HEADER_SIZE:]
-    return unparsed_data, src_mac, ether_type
+    payload = raw_frame[HEADER_SIZE:]
+    return payload, src_mac, ether_type
 
-def craft_ethernet(src_mac : bytes, dst_mac : bytes, data : bytes, protocol_type : bytes) -> bytes:
+def craft_ethernet(src_mac : bytes, dst_mac : bytes, payload : bytes, protocol_type : int) -> bytes:
     """
     Crafts an ethernet frame, based on all fields that exist in ethernet.
     """
-    return dst_mac + src_mac + protocol_type + data
+    return dst_mac + src_mac + struct.pack("!H", protocol_type) + payload
