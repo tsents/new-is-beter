@@ -42,7 +42,7 @@ def dispatch_ethernet(payload : bytes, src_mac : bytes, eth_type : bytes, my_mac
     and calls "craft_ethernet" if an ethernet response is needed.
     """
     if eth_type == ARP_TYPE:
-        response = arp_protocol.parse_arp(payload, my_mac)
+        response = arp_protocol.handle_arp(payload, my_mac)
         if not response is None:
             response_payload, dst_mac = response
             return craft_ethernet(my_mac, dst_mac, response_payload, ARP_TYPE)
