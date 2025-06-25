@@ -18,7 +18,7 @@ def sniffer(sock, iface : str) -> None:
         raw_frame = sock.recv_raw()
         if raw_frame[1] is None:
             continue
-        response = ethernet_protocol.ethernet_protcol(raw_frame[1], my_numeric_mac, False)
+        response = ethernet_protocol.handle_ethernet(raw_frame[1], my_numeric_mac, False)
         if response is not None:
             sock.send(response)
 
