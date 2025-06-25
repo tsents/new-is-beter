@@ -14,7 +14,7 @@ OPERATION_OFFSET = 6
 MAC_LENGTH = 6
 IP_LENGTH = 4
 
-def handle_arp(raw_data : bytes, my_mac : bytes) -> Optional[Tuple[bytes, bytes]]:
+def handle_arp(raw_data : bytes, my_mac : bytes, my_ip : bytes) -> Optional[Tuple[bytes, bytes]]:
     """
     Implements the arp protocol, including parsing of arp requests & responses,
     and responding to those request (Dummy response not to break my network).
@@ -41,14 +41,14 @@ def handle_arp(raw_data : bytes, my_mac : bytes) -> Optional[Tuple[bytes, bytes]
         return None
     elif operation == OPERATION_REQUEST:
         print(f"Who has {pretty_ip(resolve_net)}, tell {pretty_ip(src_net)} at {pretty_mac(src_hardware)}")
-        print(">>>>>>>>>")
-        # TODO - get my IP and check against resolve_net
-        arp_response = craft_arp(hardware_type, protocol, hardware_length, protocol_length,
-                                 OPERATION_REPLY, my_mac, resolve_net, src_hardware, src_net)
-        print("Possible arp response:")
-        handle_arp(arp_response, my_mac)
-        print("<<<<<<<<<\n")
-        # return arp_response, src_hardware
+        if (my_ip == resolve_net):
+            print(">>>>>>>>>")
+            arp_response = craft_arp(hardware_type, protocol, hardware_length, protocol_length,
+                                     OPERATION_REPLY, my_mac, resolve_net, src_hardware, src_net)
+            print("Sent arp response:")
+            handle_arp(arp_response, my_mac, my_ip)
+            print("<<<<<<<<<\n")
+            return arp_response, src_hardware
     return None
 
 def craft_arp(hardware_type : int, protocol : int, hardware_length : int, protocol_length : int, operation : int,

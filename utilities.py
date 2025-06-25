@@ -1,5 +1,16 @@
+from scapy.all import IFACES
 
+def my_mac(interface : str) -> bytes:
+    return raw_mac(IFACES.get(interface).mac)
 
+def my_ip(interface : str) -> bytes:
+    return raw_ip(IFACES.get(interface).ip)
+
+def raw_ip(pretty_ip : str) -> bytes:
+    """
+    Formats ip from *.*.*.* string to raw bytes format. 
+    """
+    return bytes(int(i) for i in pretty_ip.split("."))
 
 def pretty_ip(raw_ip : bytes) -> str:
     """

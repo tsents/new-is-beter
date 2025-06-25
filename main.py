@@ -1,24 +1,15 @@
-from scapy.all import conf, IFACES
-import utilities
+from scapy.all import conf
 import ethernet_protocol
 
 def sniffer(sock, iface : str) -> None:
     """
     Sniffes given interface, parsing using my protocol functions.
     """
-    my_interface = IFACES.get(iface)
-    if my_interface is None:
-        return
-    my_mac : str | None = my_interface.mac
-    if my_mac is None:
-        return
-
-    my_numeric_mac : bytes = utilities.raw_mac(my_mac)
     while True: 
         raw_frame = sock.recv_raw()
         if raw_frame[1] is None:
             continue
-        response = ethernet_protocol.handle_ethernet(raw_frame[1], my_numeric_mac, False)
+        response = ethernet_protocol.handle_ethernet(raw_frame[1], iface, False)
         if response is not None:
             sock.send(response)
 
