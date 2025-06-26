@@ -48,7 +48,7 @@ def dispatch_ethernet(payload : bytes, src_mac : bytes, eth_type : bytes, interf
     if eth_type == ARP_TYPE:
         response = arp_protocol.handle_arp(payload, my_mac, utilities.my_ip(interface))
     elif eth_type == IP4_TYPE:
-        response = ip_protocol.handle_ip(payload, my_mac, utilities.my_ip(interface))
+        response = ip_protocol.handle_ip(payload, utilities.my_ip(interface))
     
     if not response is None:
         response_payload, _ = response # The ignored arg is who requested the arp. we allready have from eth layer.
