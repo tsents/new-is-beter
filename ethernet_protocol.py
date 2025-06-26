@@ -2,12 +2,14 @@ import struct
 from typing import Optional
 
 import arp_protocol
+import ip_protocol
 import utilities
 
 ETH_PROTOCOL="!6s6sH"
 HEADER_SIZE = 14
 BROADCAST = b"\xff\xff\xff\xff\xff\xff"
 ARP_TYPE = 0x0806
+IP4_TYPE = 0x0800
 
 
 def handle_ethernet(raw_frame : bytes, interface : str, promisc : bool) -> Optional[bytes]:
@@ -45,6 +47,8 @@ def dispatch_ethernet(payload : bytes, src_mac : bytes, eth_type : bytes, interf
     response = None
     if eth_type == ARP_TYPE:
         response = arp_protocol.handle_arp(payload, my_mac, utilities.my_ip(interface))
+    elif eth_type == IP4_TYPE:
+        response = ip_protocol.handle_ip(payload, my_mac, utilities.my_ip(interface))
     
     if not response is None:
         response_payload, _ = response # The ignored arg is who requested the arp. we allready have from eth layer.
