@@ -17,7 +17,8 @@ IP_LENGTH = 4
 def handle_arp(payload : bytes, my_mac : bytes, my_ip : bytes) -> Optional[Tuple[bytes, bytes]]:
     """
     Implements the arp protocol, including parsing of arp requests & responses,
-    and responding to those request (Dummy response not to break my network).
+    and responding to those request by returning the response payload back
+    to the ethernet function.
 
     @param parload: The raw data from the above level to parse. (AKA from ethernet)
     @param my_mac:   My own mac, used to check.
