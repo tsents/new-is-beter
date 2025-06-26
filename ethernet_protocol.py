@@ -41,11 +41,13 @@ def dispatch_ethernet(payload : bytes, src_mac : bytes, eth_type : bytes, interf
     Given parsed ethernet frame, calls the functions of the next layers needed,
     and calls "craft_ethernet" if an ethernet response is needed.
     """
+    my_mac = utilities.my_mac(interface)
+    response = None
     if eth_type == ARP_TYPE:
-        my_mac = utilities.my_mac(interface)
         response = arp_protocol.handle_arp(payload, my_mac, utilities.my_ip(interface))
-        if not response is None:
-            response_payload, _ = response # The ignored arg is who requested the arp. we allready have from eth layer.
-            return craft_ethernet(my_mac, src_mac, response_payload, ARP_TYPE) #sends arp back to src
+    
+    if not response is None:
+        response_payload, _ = response # The ignored arg is who requested the arp. we allready have from eth layer.
+        return craft_ethernet(my_mac, src_mac, response_payload, ARP_TYPE) #sends arp back to src
     return 
 
